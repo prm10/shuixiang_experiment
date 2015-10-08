@@ -1,0 +1,21 @@
+进入窗口
+iMenu = 769;
+ResetTank();
+input_mode=0;
+if input_mode == 0 then
+	#txtAM.Text = "M序列";
+else
+	#txtAM.Text = "手动";
+endif
+
+窗口运行周期执行
+if input_mode == 0 then
+	Control1.PV = PIDCtrl1.OP*0.24;
+else
+	Control1.PV = amplitude*M_sequence[M_index]+PIDCtrl1.OP*0.24;
+	if M_index==M_length-1 then 
+		M_index=0;
+	else
+		M_index=M_index+1;
+	endif
+endif
