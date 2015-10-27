@@ -1,0 +1,3 @@
+clear;close all;clc;
+data=importdata('data_d1_15s.csv',',');
+t=data.
