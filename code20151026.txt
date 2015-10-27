@@ -1,0 +1,111 @@
+进入窗口
+iMenu = 769;
+ResetTank();
+input_mode=0;
+input_value=0;
+if input_mode == 0 then
+    #txtAM.Text = "M序列";
+else
+    #txtAM.Text = "手动";
+endif
+
+delta_t=3;
+Tindex=0;
+Mindex=0;
+amplitude=2;
+
+FileName="D://data.txt";
+Mlength=FileDataCount(FileName);
+
+int i=0;
+while (i<Mlength) do
+	FileRead(FileName,temp,i,1);
+	Msequence.Add(temp);
+	i=i+1;
+endwhile
+
+#txtInfo.Text=IntToStr(Msequence.GetCount(),10);
+#txtInfo1.Text=IntToStr(Msequence[0],10);
+
+窗口运行周期执行
+input_value=PIDCtrl1.OP*0.24;
+Tindex=Tindex+1;
+if Tindex==delta_t then
+	Tindex=0;
+endif
+
+if input_mode == 1 then
+    input_value = input_value+amplitude*0.24*Msequence[Mindex];
+	#txtInfo.Text=IntToStr(Mindex,10);
+	#txtInfo1.Text=IntToStr(Msequence[Mindex],10);
+	if Tindex==0 then
+	    if Mindex==Mlength-1 then 
+	        Mindex=0;
+	    else
+			Mindex=Mindex+1;
+	    endif
+	endif
+else
+	#txtInfo.Text=IntToStr(Tindex,10);
+endiF
+
+if input_value>24 then 
+    input_value=24;
+endif
+if input_value<0 then
+    input_value=0;
+endif
+Control1.PV = input_value;
+
+M按钮 按下鼠标
+input_mode=1;
+if  #txtAM.Text == "手动" then
+	if msgbox("确定要把输入改为手动吗？") then
+		#txtAM.Text = "M序列";
+		input_mode=0;
+	endif
+else
+	if msgbox("确定要把输入改为M序列吗？") then
+		#txtAM.Text = "手动";
+		input_mode=1;
+		Tindex=0;
+		Mindex=0;
+	endif
+endif
+
+M序列参数设置
+if StrToInt(#edit_delta_t.Text)<1 then 
+	msgbox("采样时间要为正整数");
+else 
+	if StrToInt(#edit_amplitude.Text)<1 then
+		msgbox("振幅要为正整数");
+	else
+		delta_t = StrToInt(#edit_delta_t.Text);
+		amplitude = StrToInt(#edit_amplitude.Text);
+		CloseCurWindow();
+	endif
+endif
+
+
+读取M序列函数
+FileName="D://data.txt";
+Mlength=FileDataCount(FileName);
+FileRead(FileName,Msequence,0,Mlength);
+
+
+
+int i=0;
+string temp;
+while (i<Mlength) do
+	FileRead(FileName,temp,i,1);
+	#txtInfo1.Text=temp;
+	Msequence.Add(StrToInt("4"));
+	i=i+1;
+endwhile
+
+
+int i=0;
+string temp;
+FileRead(FileName,temp,0,Mlength);
+#txtInfo.Text=temp[1];
+#txtInfo1.Text=temp[2];

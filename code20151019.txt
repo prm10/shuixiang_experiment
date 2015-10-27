@@ -1,0 +1,61 @@
+进入窗口
+iMenu = 769;
+ResetTank();
+input_mode=0;
+input_value=0;
+if input_mode == 0 then
+    #txtAM.Text = "M序列";
+else
+    #txtAM.Text = "手动";
+endif
+Msequence.Add(-1);
+Msequence.Add(3);
+Msequence.Add(1);
+Msequence.Add(2);
+Msequence.Add(-1);
+Msequence.Add(1);
+Mlength=6;
+Mindex=0;
+amplitude=2;
+
+窗口运行周期执行
+input_value=PIDCtrl1.OP*0.24;
+if input_mode == 1 then
+    //input_value = input_value+amplitude*0.24*Msequence[0];
+    //amplitude=amplitude*-1;
+    input_value = Mindex;
+    if Mindex==Mlength-1 then 
+        Mindex=0;
+    else
+        Mindex=Mindex+1;
+    endif
+endif
+
+if input_value>24 then 
+    input_value=24;
+endif
+if input_value<0 then
+    input_value=0;
+endif
+Control1.PV = input_value;
+
+M按钮 按下鼠标
+input_mode=1;
+if  #txtAM.Text == "手动" then
+	if msgbox("确定要把输入改为手动吗？") then
+		#txtAM.Text = "M序列";
+		input_mode=0;
+	endif
+else
+	if msgbox("确定要把输入改为M序列吗？") then
+		#txtAM.Text = "手动";
+		input_mode=1;
+	endif
+endif
+
+读取M序列函数
+FileName="D://data.txt";
+M_length=FileDataCount(FileName);
+Msequence=FileRead(FileName,real Var,0,M_length)
+
+

@@ -2,33 +2,42 @@
 iMenu = 769;
 ResetTank();
 input_mode=0;
+input_value=0;
 if input_mode == 0 then
-	#txtAM.Text = "M序列";
+    #txtAM.Text = "M序列";
 else
-	#txtAM.Text = "手动";
+    #txtAM.Text = "手动";
 endif
-
-M_sequence[0]=1;
-M_sequence[1]=1;
-M_sequence[2]=1;
-M_sequence[3]=-1;
-M_sequence[4]=1;
-M_sequence[5]=-1;
+Msequence[0]=-1;
+Msequence[1]=2;
+Msequence[2]=3;
+Msequence[3]=4;
+Msequence[4]=5;
+Msequence[5]=6;
 M_length=6;
 M_index=0;
-amplitude=1;
+amplitude=2;
 
 窗口运行周期执行
-if input_mode == 0 then
-	Control1.PV = PIDCtrl1.OP*0.24;
-else
-	if M_index==M_length then 
-		M_index=0;
-	else
-		M_index=M_index+1;
-	endif
-	Control1.PV = amplitude*M_sequence[M_index]+PIDCtrl1.OP*0.24;
+input_value=PIDCtrl1.OP*0.24;
+if input_mode == 1 then
+    //input_value = input_value+amplitude*0.24*Msequence[0];
+    //amplitude=amplitude*-1;
+    input_value = M_index;
+    if M_index==M_length-1 then 
+        M_index=0;
+    else
+        M_index=M_index+1;
+    endif
 endif
+
+if input_value>24 then 
+    input_value=24;
+endif
+if input_value<0 then
+    input_value=0;
+endif
+Control1.PV = input_value;
 
 M按钮 按下鼠标
 input_mode=1;
