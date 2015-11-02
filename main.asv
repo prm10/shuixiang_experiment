@@ -76,7 +76,7 @@ subplot(212);plot(t3,output,'*');
 %% 将输入标准化到-1和1；将输出减去稳态值
 input=2*(input>5)-1;
 output=output-y0;
-save('data.mat','input','output');
+save('data.mat','input','output')
 %% 系统辨识
 u_M=input;
 z=output';
