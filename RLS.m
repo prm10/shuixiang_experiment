@@ -3,6 +3,7 @@ L=Np;
 n=1;
 Theta=cell(0);
 flag=0;
+N=1;
 while n<=6
     %¿ªÊ¼µü´ú
     new_theta2=zeros(2*n,1);p=1e20*eye(2*n);J_k=0;h=zeros(L,2*n);

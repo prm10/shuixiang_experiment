@@ -1,80 +1,100 @@
 clear;close all;clc;
-deltat=30;
-data=importdata('data_d1_15s.csv',',');
+deltat=25;
+Np=31;
+data=importdata(strcat('data_d1_',num2str(deltat),'s',num2str(Np),'.csv'),',');
 t1=datenum(data.textdata);
 v1=data.data;
-data=importdata('data_s1_15s.csv',',');
+data=importdata(strcat('data_s3_',num2str(deltat),'s',num2str(Np),'.csv'),',');
 t2=datenum(data.textdata);
 v2=data.data;
-figure,hold on;
+t2=(t2-t1(1))*24*3600;
+t1=(t1-t1(1))*24*3600;
+%画图
+figure;
+subplot(211);hold on;
 for i1=1:length(t1)-1
     plot(t1(i1:i1+1),[v1(i1) v1(i1)],'b');
     plot([t1(i1+1) t1(i1+1)],v1(i1:i1+1),'b');
 end
+title('输入：电机电压'),xlabel('时间/s');ylabel('电压');
+subplot(212);hold on;
 for i1=1:length(t2)-1
     plot(t2(i1:i1+1),[v2(i1) v2(i1)],'r');
     plot([t2(i1+1) t2(i1+1)],v2(i1:i1+1),'r');
 end
-% plot([t2(1) t2(end)],[v2(459) v2(459)]);
+title('输出：液面高度'),xlabel('时间/s');ylabel('液面高度');
+%15s31
+youxiao=4:57;
+y0=160;
 
-% figure,hold on;
-% for i1=1:length(t1)-1
-%     plot(i1:i1+1,[v1(i1) v1(i1)],'b');
-%     plot([(i1+1) (i1+1)],v1(i1:i1+1),'b');
-% end
-% for i1=1:length(t2)-1
-%     plot([i1:i1+1],[v2(i1) v2(i1)],'r');
-%     plot([(i1+1) (i1+1)],v2(i1:i1+1),'r');
-% end
-tmin=t1(1);%max([min(t1);min(t2)]);
-tmax=min([max(t1);max(t2)]);
-n=floor((tmax-tmin)*24*3600/deltat);
-for i1=0:n
-    t=tmin+i1*deltat/3600/24+5/3600/24;
-    index=find(t1<t);
-    input(i1+1,1)=v1(index(end));
-    t=tmin+i1*deltat/3600/24;
-    index=find(t2<t);
-    output(i1+1,1)=v2(index(end));
+%50s15
+% youxiao=3:78;
+% y0=140;
+%选取有效数据段
+t1=t1(youxiao);
+v1=v1(youxiao);
+%获得01段
+a1=v1>5;
+a2=logical([1;xor(a1(2:end),a1(1:end-1))]);
+a3=[a1 a2];
+t1=t1(a2);
+v1=v1(a2);
+%变成输入
+t0=t1(1);
+i2=1;
+for i1=1:length(t1)-1
+    input(i2,1)=v1(i1);
+    t3(i2,1)=t1(i1);
+    t0=t0+deltat;
+    i2=i2+1;
+    while t1(i1+1)-t0>0.5*deltat
+        input(i2,1)=v1(i1);
+        t3(i2,1)=t0;
+        t0=t0+deltat;
+        i2=i2+1;
+    end
+    t0=t1(i1+1);
 end
-figure,hold on;
-for i1=1:length(input)-1
-    plot(i1:i1+1,[input(i1) input(i1)],'b');
-    plot([(i1+1) (i1+1)],input(i1:i1+1),'b');
+input(i2,1)=v1(end);
+t3(i2,1)=t1(end);
+%画图检验输入
+% for i1=1:length(input)-1
+%     plot(t3(i1:i1+1),[input(i1) input(i1)],'g');
+%     plot([t3(i1+1) t3(i1+1)],input(i1:i1+1),'g');
+% end
+
+input=2*(input>5)-1;
+for i1=1:length(t3)
+    index=find(t2<=t3(i1));
+    output(i1,1)=v2(index(end));
 end
-input=2*(input>mean(input))-1;
+%画图检验输出
+% plot(t3,output,'*');
+
 figure;
-subplot(211);plot(input);
-subplot(212);plot(output);
+hold on;
+plot(t3,output,'--*');
+for i1=1:length(input)-1
+    plot(t3(i1:i1+1),[input(i1) input(i1)],'r');
+    plot([t3(i1+1) t3(i1+1)],input(i1:i1+1),'r');
+end
+title('去除稳态值后的增量输入输出');
+xlabel('时间/s');
+legend('output','input');
 
-% a_M=1;
-% Np_M=15;
-% L_M=length(input);
-% u_M=input;
-% y=output;
-
-% R_Mzk=zeros(Np_M-1,1);
-% for i=1:Np_M-1
-%     tempSum=0;
-%     for j=0:L_M-1
-%         if(j-i+1<=0)
-%             tempNp=Np_M;
-%         else
-%              tempNp=0;
-%         end
-%         tempSum=tempSum+u_M(j-i+1+tempNp)*y(j+1);
-%     end
-%     R_Mzk(i)=tempSum/L_M;
-% end
-% C=-1*R_Mzk(Np_M-1);
-% g_bar_hat=Np_M/((Np_M+1)*a_M^2)*(R_Mzk+C);
-% figure();plot([1:1:Np_M-1],g_bar_hat);xlabel('时间/s')
-
+output=output-y0;
 u_M=input;
 z=output';
-Np=7;
-[J_L1, N1 ,theta1 ,t1, z_p]=Ls(u_M,z,Np,10,0);%批量最小二乘（LS）
-[J_L2, N2, theta2, t2, theta]=RLS(u_M,z,Np,10,0);%递推最小二乘（RLS）
-Np=7;
-plotresult(Np,J_L1,J_L2,t1,t2,z,z_p,theta);% 画图
+
+%脉冲响应辨识
+[g_k]=xgfxf(u_M',output,Np);
+figure;
+plot(1:deltat:deltat*length(g_k),g_k);
+title('脉冲响应辨识结果'),xlabel('时间/s');ylabel('g_k');
+grid;
+
+% %最小二乘辨识
+% [J_L1, N1 ,theta1 ,t1, z_p]=Ls(u_M,z,Np,10,0);%批量最小二乘（LS）
+% [J_L2, N2, theta2, t2, theta]=RLS(u_M,z,Np,10,0);%递推最小二乘（RLS）
+% plotresult(Np,J_L1,J_L2,t1,t2,z,z_p,theta);% 画图
 
