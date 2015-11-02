@@ -1,6 +1,6 @@
 clear;close all;clc;
-deltat=25;
-Np=31;
+deltat=50;
+Np=15;
 data=importdata(strcat('data_d1_',num2str(deltat),'s',num2str(Np),'.csv'),',');
 t1=datenum(data.textdata);
 v1=data.data;
@@ -28,8 +28,8 @@ youxiao=4:57;
 y0=160;
 
 %50s15
-% youxiao=3:78;
-% y0=140;
+youxiao=3:78;
+y0=140;
 %选取有效数据段
 t1=t1(youxiao);
 v1=v1(youxiao);
@@ -71,6 +71,10 @@ end
 %画图检验输出
 % plot(t3,output,'*');
 
+output=output-y0;
+u_M=input;
+z=output';
+
 figure;
 hold on;
 plot(t3,output,'--*');
@@ -82,17 +86,20 @@ title('去除稳态值后的增量输入输出');
 xlabel('时间/s');
 legend('output','input');
 
-output=output-y0;
-u_M=input;
-z=output';
-
 %脉冲响应辨识
 [g_k]=xgfxf(u_M',output,Np);
 figure;
-plot(1:deltat:deltat*length(g_k),g_k);
+plot(deltat:deltat:deltat*length(g_k),g_k);
 title('脉冲响应辨识结果'),xlabel('时间/s');ylabel('g_k');
 grid;
-
+figure;
+n=Np+1:Np+Np;
+for i1=n
+    output1(i1-n(1)+1,1)=g_k'*input(i1-1:-1:i1-Np+1);
+end
+plot(t3(n),output(n),t3(n),output1);
+title('脉冲响应辨识重构结果'),xlabel('时间/s');ylabel('液面高度');
+legend('真实输出','重构输出');
 % %最小二乘辨识
 % [J_L1, N1 ,theta1 ,t1, z_p]=Ls(u_M,z,Np,10,0);%批量最小二乘（LS）
 % [J_L2, N2, theta2, t2, theta]=RLS(u_M,z,Np,10,0);%递推最小二乘（RLS）
