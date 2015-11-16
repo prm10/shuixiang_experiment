@@ -1,5 +1,4 @@
 clear;close all;clc;
-%% 需要根据实验进行修改的变量有：deltat、Np、youxiao、y0 
 deltat=50;%实际采样间隔/s
 Np=15;%M序列周期
 data=importdata(strcat('data_d1_',num2str(deltat),'s',num2str(Np),'.csv'),',');
