@@ -111,8 +111,8 @@ legend('真实输出','重构输出');
 [J_L2, N2, theta2, t2, theta]=RLS(u_M,z,Np,10,0);%递推最小二乘（RLS）
 plotresult(Np,J_L1,J_L2,t1,t2,z,z_p,theta);% 画图
 
-% index=1:30;
-% g2=0.91.^(index-1)*10.7;
-% plot(index*deltat,g_k,index*deltat,g2,'--');
-% title('脉冲响应辨识结果'),xlabel('时间/s');ylabel('g_k');
-% legend('脉冲响应辨识结果','最小二乘辨识结果理论值');
+index=1:30;
+g2=0.91.^(index-1)*10.7;
+plot(index*deltat,g_k,index*deltat,g2,'--');
+title('脉冲响应辨识结果'),xlabel('时间/s');ylabel('g_k');
+legend();
